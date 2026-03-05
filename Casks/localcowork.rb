@@ -1,5 +1,5 @@
 cask "localcowork" do
-  version "0.1.0"
+  version "0.1.1"
   sha256 arm:   "PLACEHOLDER_ARM64",
          intel: "PLACEHOLDER_X86_64"
 
