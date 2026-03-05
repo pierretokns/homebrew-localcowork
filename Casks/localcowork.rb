@@ -1,11 +1,11 @@
 cask "localcowork" do
-  version "0.1.1"
-  sha256 arm:   "PLACEHOLDER_ARM64",
-         intel: "PLACEHOLDER_X86_64"
+  version "0.1.1,0.1.0"
+  sha256 arm:   "b7110382694eb9577d8f0b52556c2e2c185c7f61e3425557c370a2dc7360f974",
+         intel: "045c10c13413c8bff13d959d5c747239df4d77cb8d91b54dc38d34b25a0a2b89"
 
-  arch arm: "aarch64-apple-darwin", intel: "x86_64-apple-darwin"
+  arch arm: "aarch64", intel: "x64"
 
-  url "https://github.com/pierretokns/cookbook/releases/download/localcowork-v#{version}/LocalCowork_#{version}_#{arch}.dmg"
+  url "https://github.com/pierretokns/cookbook/releases/download/localcowork-v#{version.csv.first}/LocalCowork_#{version.csv.second}_#{arch}.dmg"
   name "LocalCowork"
   desc "On-device AI agent by Liquid AI, powered by LFM2 via llama.cpp"
   homepage "https://github.com/Liquid4All/cookbook/tree/main/examples/localcowork"
