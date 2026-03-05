@@ -7,7 +7,7 @@ cask "localcowork" do
 
   url "https://github.com/pierretokns/cookbook/releases/download/localcowork-v#{version}/LocalCowork_#{version}_#{arch}.dmg"
   name "LocalCowork"
-  desc "On-device AI assistant powered by LFM2, no cloud dependency"
+  desc "On-device AI agent by Liquid AI, powered by LFM2 via llama.cpp"
   homepage "https://github.com/Liquid4All/cookbook/tree/main/examples/localcowork"
 
   livecheck do
@@ -21,17 +21,20 @@ cask "localcowork" do
 
   app "LocalCowork.app"
 
-  postflight do
-    ohai "LocalCowork installed!"
-    ohai ""
-    ohai "You need the LFM2-24B-A2B model (~14 GB) to run LocalCowork."
-    ohai "Download it with:"
-    ohai "  pip install huggingface-hub"
-    ohai "  huggingface-cli download LiquidAI/LFM2-24B-A2B-GGUF LFM2-24B-A2B-Q4_K_M.gguf --local-dir ~/Models"
-    ohai ""
-    ohai "Then start the model server:"
-    ohai "  llama-server --model ~/Models/LFM2-24B-A2B-Q4_K_M.gguf --port 8080 --ctx-size 32768 --n-gpu-layers 99 --flash-attn"
-  end
+  caveats <<~EOS
+    LocalCowork requires the LFM2-24B-A2B model (~14 GB) to function.
+
+    Download the model:
+      pip install huggingface-hub
+      huggingface-cli download LiquidAI/LFM2-24B-A2B-GGUF LFM2-24B-A2B-Q4_K_M.gguf --local-dir ~/Models
+
+    Start the model server before launching the app:
+      llama-server --model ~/Models/LFM2-24B-A2B-Q4_K_M.gguf \\
+        --port 8080 --ctx-size 32768 --n-gpu-layers 99 --flash-attn
+
+    This is a community package of Liquid AI's open-source project.
+    Source: https://github.com/Liquid4All/cookbook/tree/main/examples/localcowork
+  EOS
 
   zap trash: [
     "~/.localcowork",
