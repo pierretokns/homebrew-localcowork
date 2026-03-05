@@ -1,0 +1,63 @@
+name: Update Cask on Release
+
+on:
+  repository_dispatch:
+    types: [localcowork-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to update to (e.g. 0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  update-cask:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download release artifacts and compute checksums
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BASE_URL="https://github.com/pierretokns/cookbook/releases/download/localcowork-v${VERSION}"
+
+          # Download arm64 dmg
+          curl -fSL "${BASE_URL}/LocalCowork_${VERSION}_aarch64-apple-darwin.dmg" -o arm64.dmg
+          ARM64_SHA=$(shasum -a 256 arm64.dmg | awk '{print $1}')
+          echo "arm64_sha=${ARM64_SHA}" >> "$GITHUB_OUTPUT"
+
+          # Download x86_64 dmg
+          curl -fSL "${BASE_URL}/LocalCowork_${VERSION}_x86_64-apple-darwin.dmg" -o x86_64.dmg
+          X86_SHA=$(shasum -a 256 x86_64.dmg | awk '{print $1}')
+          echo "x86_sha=${X86_SHA}" >> "$GITHUB_OUTPUT"
+        id: checksums
+
+      - name: Update cask definition
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ARM64_SHA="${{ steps.checksums.outputs.arm64_sha }}"
+          X86_SHA="${{ steps.checksums.outputs.x86_sha }}"
+
+          sed -i "s/version \".*\"/version \"${VERSION}\"/" Casks/localcowork.rb
+          sed -i "s/arm:   \".*\"/arm:   \"${ARM64_SHA}\"/" Casks/localcowork.rb
+          sed -i "s/intel: \".*\"/intel: \"${X86_SHA}\"/" Casks/localcowork.rb
+
+      - name: Commit and push
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/localcowork.rb
+          git commit -m "Update LocalCowork to v${VERSION}"
+          git push
